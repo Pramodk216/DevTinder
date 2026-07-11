@@ -17,7 +17,7 @@ app.post("/signup", async (req, res) => {
     await user.save();
     res.send("User created successfully");
    }catch(err){
-    res.status(400).send("User creation failed:", err);
+    res.status(400).send("User creation failed:" + err);
    }
 });
 
@@ -33,7 +33,7 @@ app.get("/user", async (req, res) => {
           res.send(users);
         }
     }catch(err){
-        res.status(400).send("User fetching failed:", err);
+        res.status(400).send("User fetching failed:" + err);
     }
 })
 
@@ -43,7 +43,7 @@ app.get("/feed", async (req, res) => {
         const users = await User.find();
         res.send(users);
     }catch(err){
-        res.status(400).send("User fetching failed:", err);
+        res.status(400).send("User fetching failed:" + err);
     }
 })
 
@@ -53,12 +53,13 @@ app.patch("/user", async (req, res) => {
 
     try{
         const updatedUser = await User.findByIdAndUpdate({ _id: userId }, data, {
-            returnDocument: "after"
+            returnDocument: "after",
+            runValidators: true,
         });
         console.log(updatedUser);
         res.status(200).send("User updated successfully");
     }catch(err){
-        res.status(400).send("User update failed:", err);
+        res.status(400).send("User update failed:" + err);
     }
 })
 
