@@ -3,29 +3,21 @@ const express = require('express');
 const app = express();
 
 
-
-// This will handle only GET requests to the /user path
-app.get("/user",  (req,res) => {
-    res.send({name: "John", age: 20});
+//  '/ab*c' will match '/abc', only thing between ab and c is matched
+//  /.*fly$/  any route that ends with fly
+// /a/  any route that contains a
+// /ab?c/  b is opional
+// /ab+c/  b is required and can be repeated
+// //a(bc)?c  bc is optional
+app.get(/a(bc)?d/,  (req,res) => {
+    res.send("Advanced route");
 })
 
-// This will handle only POST requests to the /user path
-app.post("/user",  (req,res) => {
-    res.send("User created successfully");
-})
-
-// This will handle only DELETE requests to the /user path
-app.delete("/user",  (req,res) => {
-    res.send("User deleted successfully");
-})
-
-// This will handle all HTTP requests(GET, POST, DELETE, etc.) that are made to the /test path
-app.use("/test",  (req,res) => {
-    res.send("This is a test page");
-})
-
-app.use("/",  (req,res) => {
-    res.send("Hello NodeJs!");
+app.get('/user/:id/:status',  (req,res) => {
+    console.log(req.params.id);
+    console.log(req.params.status);
+    console.log(req.query);
+    res.send("Advanced route");
 })
 
 app.listen(3000, () => {
