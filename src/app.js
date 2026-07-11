@@ -1,28 +1,31 @@
 const express = require('express');
+const { authAdmin, authUser } = require('./middlewares/auth');
 
 const app = express();
 
-app.use("/", (req, res, next) => {
-    console.log("Root Route handler");
-    next();
+app.use("/admin", authAdmin);
+
+
+
+app.post("/user/login", (req, res, next)=>{
+    console.log("User login");
+    res.send("User is logged in");
+});
+
+app.get("/user/data", authUser, (req, res, next)=> {
+    console.log("User data");
+    res.send("Get all User Data");
+});
+
+app.get("/admin/getAllData", (req, res, next) => {
+    console.log("getAllData Route handler");
+    res.send("Get all data");
 })
 
-app.use("/user", (req, res, next) => {
-    console.log("First Route handler");
-    next();
-    // res.send("Response");
+app.delete("/admin/deleteUser", (req, res, next) => {
+    console.log("deleteUser Route handler");
+    res.send("Delete a user");
 })
-
-app.use("/user", (req, res, next) => {
-    console.log("Second Route handler");
-    next();
-})
-
-app.use("/user", (req, res, next) => {
-    console.log("Second Route handler");
-    res.send("3rd Response");
-})
-
 
 
 app.listen(3000, () => {
