@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const connectDB = require('./config/database');
 const User = require('./models/user');
@@ -94,5 +96,5 @@ connectDB().then(() => {
         console.log('Server is running on port 3000');
     });
 }).catch((err) => {
-    console.log("MongoDB connection failed");
+    console.log("MongoDB connection failed:", err.message);
 });
