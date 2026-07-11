@@ -8,12 +8,15 @@ app.use(express.json());
 
 app.post("/signup", async (req, res) => {
 
-    console.log(req.body);
+    console.log();
 
     
    const user = new User(req.body);
 
    try{
+    if(req.body.skills.length > 10){
+        return res.status(400).send("Skills must be less than 10");
+    }
     await user.save();
     res.send("User created successfully");
    }catch(err){
@@ -47,11 +50,22 @@ app.get("/feed", async (req, res) => {
     }
 })
 
-app.patch("/user", async (req, res) => {
-    const userId = req.body.userId;
+app.patch("/user/:userId", async (req, res) => {
+    const userId = req.params.userId;
     const data = req.body
 
     try{
+        const allowedFields = ["firstName", "lastName", "gender", "age", "about", "skills"];
+
+        const isValidUpdateFields = Object.keys(data).every(field => allowedFields.includes(field));
+
+        if(!isValidUpdateFields){
+            return res.status(400).send("Invalid update fields");
+        }
+        if(data.skills.length > 10){
+            return res.status(400).send("Skills must be less than 10");
+        }
+
         const updatedUser = await User.findByIdAndUpdate({ _id: userId }, data, {
             returnDocument: "after",
             runValidators: true,
