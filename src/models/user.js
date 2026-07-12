@@ -29,7 +29,6 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
         minlength: 8,
-        maxlength: 50,
         validate(password){
             if(!validator.isStrongPassword(password)){
                 throw new Error("Invalid password");
