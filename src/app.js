@@ -5,10 +5,14 @@ const connectDB = require('./config/database');
 const User = require('./models/user');
 const { validateSignUpData } = require('./utils/validator');
 const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+const {authAdmin} = require('./middlewares/auth');
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 
 app.post("/login", async (req, res) => {
@@ -21,12 +25,32 @@ app.post("/login", async (req, res) => {
             const isPasswordCorrect = await bcrypt.compare(password, user.password);
             if(!isPasswordCorrect){
                 return res.status(400).send("Invalid password");
+            }else{
+                const token = await jwt.sign({ _id: user._id }, "MY_WEB_TOKEN_SECRET", { expiresIn: "1h" });
+                res.cookie("token", token);
+                res.send("Login successful");
             }
-            res.send("Login successful");
         }
 
 
 
+    }catch(err){
+        res.status(400).send("Error" + err);
+    }
+});
+
+app.get("/profile", authAdmin,  async (req, res) => {
+    try{
+        res.send(req.user);
+    }catch(err){
+        res.status(400).send("Error" + err);
+    }   
+})
+
+app.post("/sendConnection", authAdmin, async (req, res) => {
+
+    try{
+        res.send(req.user.firstName + " has sent you a connection");
     }catch(err){
         res.status(400).send("Error" + err);
     }
