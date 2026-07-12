@@ -22,11 +22,11 @@ app.post("/login", async (req, res) => {
         if(!user){
             return res.status(404).send("Invalid email");
         } else{
-            const isPasswordCorrect = await bcrypt.compare(password, user.password);
+            const isPasswordCorrect = await user.validatePassword(password);
             if(!isPasswordCorrect){
                 return res.status(400).send("Invalid password");
             }else{
-                const token = await jwt.sign({ _id: user._id }, "MY_WEB_TOKEN_SECRET", { expiresIn: "1h" });
+                const token = await user.getJWT();
                 res.cookie("token", token);
                 res.send("Login successful");
             }
