@@ -1,143 +1,23 @@
 require('dotenv').config();
-
 const express = require('express');
 const connectDB = require('./config/database');
 const User = require('./models/user');
-const { validateSignUpData } = require('./utils/validator');
-const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken');
-const {authAdmin} = require('./middlewares/auth');
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
+const requestRouter = require("./routes/request");
+const userRouter = require("./routes/user");
 
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
 
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestRouter);
+app.use("/", userRouter);
 
-app.post("/login", async (req, res) => {
-    try{
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if(!user){
-            return res.status(404).send("Invalid email");
-        } else{
-            const isPasswordCorrect = await user.validatePassword(password);
-            if(!isPasswordCorrect){
-                return res.status(400).send("Invalid password");
-            }else{
-                const token = await user.getJWT();
-                res.cookie("token", token);
-                res.send("Login successful");
-            }
-        }
-
-
-
-    }catch(err){
-        res.status(400).send("Error" + err);
-    }
-});
-
-app.get("/profile", authAdmin,  async (req, res) => {
-    try{
-        res.send(req.user);
-    }catch(err){
-        res.status(400).send("Error" + err);
-    }   
-})
-
-app.post("/sendConnection", authAdmin, async (req, res) => {
-
-    try{
-        res.send(req.user.firstName + " has sent you a connection");
-    }catch(err){
-        res.status(400).send("Error" + err);
-    }
-});
-
-app.post("/signup", async (req, res) => {
-
-
-   try{
-
-    validateSignUpData(req);
-
-    const { email, password, firstName, lastName, gender, age, about, skills } = req.body;
-
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    const user = new User({ email, password: passwordHash, firstName, lastName, gender, age, about, skills });
-    await user.save();
-    res.send("User created successfully");
-   }catch(err){
-    res.status(400).send("Error" + err);
-   }
-});
-
-
-app.get("/user", async (req, res) => {
-    const userEmail = req.body.email;
-    try{
-        const users = await User.find({ email: userEmail });
-
-        if(users.length === 0){
-            return res.status(404).send("User not found");
-        }else{
-          res.send(users);
-        }
-    }catch(err){
-        res.status(400).send("User fetching failed:" + err);
-    }
-})
-
-
-app.get("/feed", async (req, res) => {
-    try{
-        const users = await User.find();
-        res.send(users);
-    }catch(err){
-        res.status(400).send("User fetching failed:" + err);
-    }
-})
-
-app.patch("/user/:userId", async (req, res) => {
-    const userId = req.params.userId;
-    const data = req.body
-
-    try{
-        const allowedFields = ["firstName", "lastName", "gender", "age", "about", "skills"];
-
-        const isValidUpdateFields = Object.keys(data).every(field => allowedFields.includes(field));
-
-        if(!isValidUpdateFields){
-            return res.status(400).send("Invalid update fields");
-        }
-        if(data.skills.length > 10){
-            return res.status(400).send("Skills must be less than 10");
-        }
-
-        const updatedUser = await User.findByIdAndUpdate({ _id: userId }, data, {
-            returnDocument: "after",
-            runValidators: true,
-        });
-        console.log(updatedUser);
-        res.status(200).send("User updated successfully");
-    }catch(err){
-        res.status(400).send("User update failed:" + err);
-    }
-})
-
-
-app.delete("/user", async (req, res) => {
-    const userId = req.body.userId;
-    try{
-        await User.findByIdAndDelete(userId);
-        res.status(200).send("User deleted successfully");
-    }catch(err){
-        res.status(400).send("User deletion failed:", err);
-    }
-})
 
 connectDB().then(() => {
     console.log("MongoDB connected successfully");
