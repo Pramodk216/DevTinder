@@ -51,6 +51,10 @@ const userSchema = new mongoose.Schema({
         }
     },
 
+    photoUrl: {
+        type: String,
+        default: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCUw_snVdV5RDBiSbOfb0xsY2pyu3TQcLtFgbGYeORVQ&s=10",
+    },
     about: {
         type: String,
         default: "This is me.",

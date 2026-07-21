@@ -14,7 +14,7 @@ const authAdmin = async(req, res, next) => {
         req.user = user;
         next();
     }catch(err){
-        return res.status(400).send("Error" + err);
+        return res.status(401).send("Error" + err);
     }
 }
 
